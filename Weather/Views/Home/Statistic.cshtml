@@ -1,0 +1,23 @@
+﻿@model Weather.Models.ContextCity
+@{
+    ViewBag.Title = "Statistic";
+}
+
+<h2>History User's Requests by city</h2>
+
+<table border="1" style="border-collapse:collapse;" >
+    <tr class="tab-header">
+        <th>Number</th>
+        <th>City</th>
+        <th>Count</th>
+    </tr>
+
+    @foreach (var item in Model.Statistics)
+    {
+        <tr class="tab">
+            <td>@item.id</td>
+            <td>@item.city</td>
+            <td>@item.count</td>
+        </tr>
+    }
+</table>

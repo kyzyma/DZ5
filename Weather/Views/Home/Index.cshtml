@@ -1,0 +1,79 @@
+﻿@model Weather.Models.BaseObject
+@{
+    ViewBag.Title = "Index";
+}
+
+@{
+    int day = 0;
+    List<SelectListItem> listCity = new List<SelectListItem>();//Список значень для DDL
+    foreach (var item in Model.listTown)
+    {
+        listCity.Add(new SelectListItem() { Text = item.name });
+    }
+
+    /*   listCity.Add(new SelectListItem() { Text = "Kharkiv" });
+      listCity.Add(new SelectListItem() { Text = "Dnipropetrovsk" });
+      listCity.Add(new SelectListItem() { Text = "Lviv" });
+      listCity.Add(new SelectListItem() { Text = "Odessa" });
+      */
+    List<SelectListItem> listDays = new List<SelectListItem>();
+    listDays.Add(new SelectListItem() { Text = "1" });
+    listDays.Add(new SelectListItem() { Text = "3" });
+    listDays.Add(new SelectListItem() { Text = "7" });
+}
+<h2>Wheather for YOU :)</h2>
+
+<div class="jumbotron">
+        @using (Html.BeginForm())
+        {
+            <p>
+                <b>Choose city:</b> @Html.DropDownListFor(md => md.ChooseCityList, listCity) <b> if the city is not in the list then input city</b> @Html.TextBoxFor(md => md.ChooseCityInput) <br /> <br />
+                <b>forecast on:</b> @Html.DropDownListFor(md => md.CountDays, listDays) <b>days</b> 
+           </p>
+            
+            <b>Confirm your choice </b><input type="submit" value="confirm" />
+        }  
+ 
+    <hr/>
+    <p><b>today's date:</b> @DateTime.Now</p>
+    <p><b>city:</b> @Model.city.name</p>
+    <p><b>country:</b> @Model.city.country</p>
+    <table border="1" style="border-collapse:collapse;" >
+        <tr  class="tab-header">
+            <td>Date </td>
+            <td>Cloudiness</td>
+            <td>Clouds</td>
+            <td>Temperature</td>
+            <td>Pressure</td>
+            <td>Humidity</td>
+            <td>Wind speed </td>
+            <td>Deg</td>
+            
+        </tr>
+        @foreach (var item in Model.list)
+        {
+            <tr class="tab">
+                <td class="tab-header">@DateTime.Now.AddDays(day++).ToShortDateString()</td>
+                <td>
+                    @foreach (var i in item.weather)
+                    {
+                        @i.description;
+                    }
+                    </td>
+                <td>@item.clouds%</td>
+                <td>@item.temp.day</td>
+                <td>@item.pressure</td>
+                <td>@item.humidity%</td>
+                <td>@item.speed m/s</td>
+                <td>@item.deg</td>
+                
+            </tr>
+            
+            if (Model.CountDays == day)
+            {
+                break;
+            }
+        }
+    </table>
+</div>
+

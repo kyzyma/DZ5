@@ -1,0 +1,27 @@
+﻿@{
+    ViewBag.Title = "Setting";
+}
+
+<h2>Setting the list of cities</h2>
+
+<div>    
+    @using (Html.BeginForm("Setting","Home"))
+    {
+        <p>
+            <b>If you want add or update city in the list </b>             
+        </p>
+        @Html.TextBox("addCity")
+        <p>
+            <b>If you want delete city from the list </b> 
+        </p>
+        @Html.TextBox("delCity")
+
+        <p>
+            <b>Confirm your input </b> <input type="submit" value="confirm" />
+        </p>
+    }
+
+    <p style="color:red">@ViewBag.Add</p>
+    <p style="color:red">@ViewBag.Removed</p>
+
+</div>
