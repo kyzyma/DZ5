@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using Weather.Models;
@@ -10,57 +11,41 @@ namespace Weather.Controllers
 {
     public class HomeController : Controller
     {        
-        IGetJasonData _jsData;
-        ContextCity context = new ContextCity();
-
-        public HomeController(IGetJasonData jsData)
+        IGetJasonData _dataServise;
+       
+        public HomeController(IGetJasonData dataServise)
         {
-            _jsData = jsData;          
+            _dataServise = dataServise;          
         }
 
         // GET: /Home/
 
-        public ActionResult Index()
-            {
-                var ob = _jsData.OutData("london",3);
-                ob.listTown = context.Towns.ToList();   //list city from BD
-                return View(ob);
-            }
+        public async Task<ActionResult> Index()
+        {            
+            this.ViewBag.Cities = new SelectList(await _dataServise.GetCities());
+            return View(await _dataServise.OutData("london", 3));
+        }
 
         [HttpPost]
-        public ActionResult Index(BaseObject baseOb)
+        public async Task<ActionResult> Index(BaseObject baseOb)
         {
             if (baseOb.ChooseCityInput == null || baseOb.ChooseCityInput.Length == 0)
             {
-                StatisticCity(baseOb.ChooseCityList);
-                var ob = _jsData.OutData(baseOb.ChooseCityList, baseOb.CountDays);
-                ob.listTown = context.Towns.ToList();
-                return View(ob);
-            }
-            else
-            {
-                StatisticCity(baseOb.ChooseCityInput);
-                var ob = _jsData.OutData(baseOb.ChooseCityInput, baseOb.CountDays);
-                ob.CountDays = baseOb.CountDays;
-                ob.listTown = context.Towns.ToList();
-                return View(ob);
-            }
-        }
+                await _dataServise.StatisticCity(baseOb.ChooseCityList);
 
-        void StatisticCity(string town)
-        {            
-            var isCity = context.Statistics.FirstOrDefault(s => s.city == town);
-            if(isCity != null)
-            {
-                 ++isCity.count;
-                context.SaveChanges();
+                this.ViewBag.Cities = new SelectList(await _dataServise.GetCities());               
+
+                return View(await _dataServise.OutData(baseOb.ChooseCityList, baseOb.CountDays));
             }
             else
             {
-                context.Statistics.Add(new Statistic { city = town, count = 1 });
-                context.SaveChanges();
+                await _dataServise.StatisticCity(baseOb.ChooseCityInput);
+
+                this.ViewBag.Cities = new SelectList(await _dataServise.GetCities());
+
+                return View(await _dataServise.OutData(baseOb.ChooseCityInput, baseOb.CountDays));
             }
-        }
+        }       
 
         public ActionResult Setting()
         {            
@@ -68,38 +53,25 @@ namespace Weather.Controllers
         }
 
         [HttpPost]
-        public ActionResult Setting(string addCity, string delCity)
+        public async Task<ActionResult> Setting(string addCity, string delCity)
         {
             if (addCity.Length != 0)
             {
-                context.Towns.Add(new Town { name = addCity });
-                context.SaveChanges();
+                await _dataServise.AddCity(new Town { name = addCity });
                 ViewBag.Add = "*City successfully added to list " ;
             }
 
             if (delCity.Length != 0)
             {
-                Town delItem = context.Towns.Where(i => i.name == delCity).FirstOrDefault();
-
-                if (delItem != null)
-                {
-                    context.Towns.Remove(delItem);
-                    context.SaveChanges();
-                    ViewBag.Removed += "*City successfully removed from list";
-                }
-                else
-                    ViewBag.Removed += "*" + delCity + " does not exist in the list";
+                await _dataServise.RemoveCity(delCity);
+                ViewBag.Removed += "*City successfully removed from list";               
             }
             return View();
         }
 
         public ActionResult Statistic()
         {
-            return View(context);
+            return View(new ContextCity());
         }
-
-
-
-
     }
 }
